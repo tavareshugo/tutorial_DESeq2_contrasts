@@ -54,19 +54,19 @@ We can then obtain the results for the effect of sun:
     ## log2 fold change (MLE): condition_sun_vs_shade effect 
     ## Wald test p-value: condition_sun_vs_shade effect 
     ## DataFrame with 1000 rows and 6 columns
-    ##            baseMean log2FoldChange     lfcSE      stat     pvalue      padj
-    ##           <numeric>      <numeric> <numeric> <numeric>  <numeric> <numeric>
-    ## gene1       5.63761      -2.358432  1.401851 -1.682370  0.0924972  0.207690
-    ## gene2      46.34294       1.160035  0.604168  1.920053  0.0548512  0.138131
-    ## gene3       5.34045       2.697561  1.654980  1.629966  0.1031088  0.223748
-    ## gene4       7.91953       0.230896  1.163678  0.198419  0.8427172  0.907254
-    ## gene5       7.08720      -0.235036  1.122997 -0.209293  0.8342191  0.903081
-    ## ...             ...            ...       ...       ...        ...       ...
-    ## gene996    0.700498      -1.775520  3.580338 -0.495908 0.61995910 0.7621804
-    ## gene997    0.000000             NA        NA        NA         NA        NA
-    ## gene998  195.554981      -1.443498  0.490371 -2.943682 0.00324333 0.0141713
-    ## gene999   21.786830       0.397908  0.774012  0.514085 0.60719278 0.7570398
-    ## gene1000   0.000000             NA        NA        NA         NA        NA
+    ##           baseMean log2FoldChange     lfcSE      stat      pvalue       padj
+    ##          <numeric>      <numeric> <numeric> <numeric>   <numeric>  <numeric>
+    ## gene1     29.02282      3.1546346  0.859398  3.670751 0.000241839 0.00125783
+    ## gene2     29.58346      1.9194327  0.689539  2.783646 0.005375161 0.01774566
+    ## gene3      4.13383     -3.6811860  1.714557 -2.147019 0.031791776 0.07455452
+    ## gene4    152.41603     -0.6757401  0.380571 -1.775597 0.075799334 0.15078885
+    ## gene5     20.27680      0.0799093  0.772992  0.103377 0.917664039 0.93678204
+    ## ...            ...            ...       ...       ...         ...        ...
+    ## gene996    5.85167       0.357406   1.35407  0.263949   0.7918196  0.8428722
+    ## gene997    6.44729      -0.212331   1.14858 -0.184864   0.8533357  0.8946572
+    ## gene998    7.07135      -2.797845   1.22080 -2.291816   0.0219163  0.0545563
+    ## gene999    3.24602       3.969345   2.47222  1.605577   0.1083669  0.1978227
+    ## gene1000   1.57966      -2.108792   2.52256 -0.835972   0.4031705  0.5424158
 
 The above is a simple way to obtain the results of interest. But it is
 worth understanding how DESeq is getting to these results by looking at
@@ -146,7 +146,7 @@ And we can check that the results are the same:
 
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
 Recoding the design - no intercept
 ----------------------------------
@@ -225,7 +225,7 @@ Again, the results are essentially the same:
 
     plot(res1$log2FoldChange, res3$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-12-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
 In theory there’s no difference between these two ways of defining our
 design. The design with an intercept is more common, but for the
@@ -341,11 +341,11 @@ And we can now define any contrasts we want:
     # check they are identical
     plot(res1_pink_white$log2FoldChange, res2_pink_white$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-17-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-17-1.png)
 
     plot(res1_pink_yellow$log2FoldChange, res2_pink_yellow$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-17-2.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-17-2.png)
 
 We could even say that we want to find genes that generally differ
 between pigmented and non-pigmented samples:
@@ -380,15 +380,15 @@ We could have created a mock group in our column data:
     ## DataFrame with 9 rows and 3 columns
     ##           colour sizeFactor pigmented
     ##         <factor>  <numeric>  <factor>
-    ## sample1   pink     0.927209     TRUE 
-    ## sample2   pink     0.925016     TRUE 
-    ## sample3   pink     0.895999     TRUE 
-    ## sample4   yellow   0.919428     TRUE 
-    ## sample5   yellow   0.895894     TRUE 
-    ## sample6   yellow   1.182511     TRUE 
-    ## sample7   white    1.140031     FALSE
-    ## sample8   white    1.151135     FALSE
-    ## sample9   white    1.168974     FALSE
+    ## sample1   pink     0.950750     TRUE 
+    ## sample2   pink     0.981239     TRUE 
+    ## sample3   pink     0.903718     TRUE 
+    ## sample4   yellow   0.976772     TRUE 
+    ## sample5   yellow   0.914177     TRUE 
+    ## sample6   yellow   1.178293     TRUE 
+    ## sample7   white    1.161341     FALSE
+    ## sample8   white    1.090987     FALSE
+    ## sample9   white    1.118380     FALSE
 
 and then re-run DESeq with a new design:
 
@@ -422,11 +422,11 @@ those groups.
 
     plot(res1_pigmented$log2FoldChange, res2_pigmented$log2FoldChange); abline(0, 1, col = "brown")
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-21-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-21-1.png)
 
     plot(res1_pigmented$lfcSE, res2_pigmented$lfcSE); abline(0, 1, col = "brown")
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-21-2.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-21-2.png)
 
 Two factors with interaction
 ============================
@@ -503,7 +503,7 @@ Pink vs White (in the shade):
     res2 <- results(dds, contrast = list("colour_pink_vs_white"))
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-25-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-25-1.png)
 
 Pink vs White (in the sun):
 
@@ -512,7 +512,7 @@ Pink vs White (in the sun):
                                            "colourpink.conditionsun")))
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-26-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-26-1.png)
 
 Sun vs Shade (for whites):
 
@@ -520,7 +520,7 @@ Sun vs Shade (for whites):
     res2 <- results(dds, contrast = list(c("condition_sun_vs_shade")))
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-27-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-27-1.png)
 
 Sun vs Shade (for pinks):
 
@@ -528,7 +528,7 @@ Sun vs Shade (for pinks):
     res2 <- results(dds, contrast = list(c("condition_sun_vs_shade", "colourpink.conditionsun")))
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-28-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-28-1.png)
 
 Interaction between colour and condition (i.e. do pinks and whites
 respond differently to the sun?):
@@ -538,7 +538,7 @@ respond differently to the sun?):
     res2 <- results(dds, contrast = list("colourpink.conditionsun"))
     plot(res1$log2FoldChange, res2$log2FoldChange)
 
-![](DESeq_contrasts_files/figure-markdown_strict/unnamed-chunk-29-1.png)
+![](DESeq2_contrasts_files/figure-markdown_strict/unnamed-chunk-29-1.png)
 
 In conclusion, although we can define these contrasts using DESeq
 coefficient names, it is somewhat more explicit (and perhaps intuitive?)

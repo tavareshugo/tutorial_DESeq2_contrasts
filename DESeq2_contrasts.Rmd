@@ -7,6 +7,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+set.seed(1)
 ```
 
 ```{r, message=FALSE, echo=FALSE}
