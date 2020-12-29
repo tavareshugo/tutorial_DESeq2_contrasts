@@ -1,6 +1,8 @@
 ---
 title: "Setting DESeq contrasts (using the model matrix)"
-output: md_document
+output: 
+  md_document:
+    variant: markdown_github
 editor_options: 
   chunk_output_type: console
 ---

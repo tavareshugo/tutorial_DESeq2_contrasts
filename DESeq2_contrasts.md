@@ -21,13 +21,17 @@ that illustrate each of the sections below.
 One factor, two levels (slide 5)
 ================================
 
-    # simulate data
-    dds <- makeExampleDESeqDataSet(n = 1000, m = 6, betaSD = 2)
-    dds$condition <- factor(rep(c("shade", "sun"), each = 3))
+``` r
+# simulate data
+dds <- makeExampleDESeqDataSet(n = 1000, m = 6, betaSD = 2)
+dds$condition <- factor(rep(c("shade", "sun"), each = 3))
+```
 
 First we can look at our sample information:
 
-    colData(dds)
+``` r
+colData(dds)
+```
 
     ## DataFrame with 6 rows and 1 column
     ##         condition
@@ -42,12 +46,16 @@ First we can look at our sample information:
 Our factor of interest is `condition` and so we define our design and
 run the DESeq model fitting routine:
 
-    design(dds) <- ~ 1 + condition # or just `~ condition`
-    dds <- DESeq(dds) # equivalent to edgeR::glmFit()
+``` r
+design(dds) <- ~ 1 + condition # or just `~ condition`
+dds <- DESeq(dds) # equivalent to edgeR::glmFit()
+```
 
 Then check what coefficients DESeq estimated:
 
-    resultsNames(dds)
+``` r
+resultsNames(dds)
+```
 
     ## [1] "Intercept"              "condition_sun_vs_shade"
 
@@ -58,8 +66,10 @@ shade).
 Using the more standard syntax, we can obtain the results for the effect
 of sun as such:
 
-    res1 <- results(dds, contrast = list("condition_sun_vs_shade"))
-    res1
+``` r
+res1 <- results(dds, contrast = list("condition_sun_vs_shade"))
+res1
+```
 
     ## log2 fold change (MLE): condition_sun_vs_shade effect 
     ## Wald test p-value: condition_sun_vs_shade effect 
@@ -96,7 +106,9 @@ worth understanding how DESeq is getting to these results by looking at
 the model’s matrix. DESeq defines the model matrix using base R
 functionality:
 
-    model.matrix(design(dds), colData(dds))
+``` r
+model.matrix(design(dds), colData(dds))
+```
 
     ##         (Intercept) conditionsun
     ## sample1           1            0
@@ -138,9 +150,11 @@ this. For any contrast of interest, we can follow three steps:
 
 Let’s see this example in action:
 
-    # get the model matrix
-    mod_mat <- model.matrix(design(dds), colData(dds))
-    mod_mat
+``` r
+# get the model matrix
+mod_mat <- model.matrix(design(dds), colData(dds))
+mod_mat
+```
 
     ##         (Intercept) conditionsun
     ## sample1           1            0
@@ -155,22 +169,28 @@ Let’s see this example in action:
     ## attr(,"contrasts")$condition
     ## [1] "contr.treatment"
 
-    # calculate the vector of coefficient weights in the sun
-    sun <- colMeans(mod_mat[dds$condition == "sun", ])
-    sun
+``` r
+# calculate the vector of coefficient weights in the sun
+sun <- colMeans(mod_mat[dds$condition == "sun", ])
+sun
+```
 
     ##  (Intercept) conditionsun 
     ##            1            1
 
-    # calculate the vector of coefficient weights in the shade
-    shade <- colMeans(mod_mat[dds$condition == "shade", ])
-    shade
+``` r
+# calculate the vector of coefficient weights in the shade
+shade <- colMeans(mod_mat[dds$condition == "shade", ])
+shade
+```
 
     ##  (Intercept) conditionsun 
     ##            1            0
 
-    # The contrast we are interested in is the difference between sun and shade
-    sun - shade
+``` r
+# The contrast we are interested in is the difference between sun and shade
+sun - shade
+```
 
     ##  (Intercept) conditionsun 
     ##            0            1
@@ -178,14 +198,18 @@ Let’s see this example in action:
 That last step is where we define our contrast vector, and we can give
 this directly to the `results` function:
 
-    # get the results for this contrast
-    res2 <- results(dds, contrast = sun - shade)
+``` r
+# get the results for this contrast
+res2 <- results(dds, contrast = sun - shade)
+```
 
 This gives us exactly the same results as before, which we can check for
 example by plotting the log-fold-changes between the first and second
 approach:
 
-    plot(res1$log2FoldChange, res2$log2FoldChange)
+``` r
+plot(res1$log2FoldChange, res2$log2FoldChange)
+```
 
 Extra: recoding the design (slide 12)
 -------------------------------------
@@ -194,9 +218,11 @@ Often, we can use different model matrices that essentially correspond
 to the same design. For example, we could recode our design above by
 removing the intercept:
 
-    design(dds) <- ~ 0 + condition
-    dds <- DESeq(dds)
-    resultsNames(dds)
+``` r
+design(dds) <- ~ 0 + condition
+dds <- DESeq(dds)
+resultsNames(dds)
+```
 
     ## [1] "conditionshade" "conditionsun"
 
@@ -207,9 +233,11 @@ the *difference* between sun and shade).
 If we use the same contrast trick as before (using the model matrix), we
 can see the result is the same:
 
-    # get the model matrix
-    mod_mat <- model.matrix(design(dds), colData(dds))
-    mod_mat
+``` r
+# get the model matrix
+mod_mat <- model.matrix(design(dds), colData(dds))
+mod_mat
+```
 
     ##         conditionshade conditionsun
     ## sample1              1            0
@@ -224,16 +252,20 @@ can see the result is the same:
     ## attr(,"contrasts")$condition
     ## [1] "contr.treatment"
 
-    # calculate weights for coefficients in each condition
-    sun <- colMeans(mod_mat[which(dds$condition == "sun"), ])
-    shade <- colMeans(mod_mat[which(dds$condition == "shade"), ])
+``` r
+# calculate weights for coefficients in each condition
+sun <- colMeans(mod_mat[which(dds$condition == "sun"), ])
+shade <- colMeans(mod_mat[which(dds$condition == "shade"), ])
 
-    # get the results for our contrast
-    res3 <- results(dds, contrast = sun - shade)
+# get the results for our contrast
+res3 <- results(dds, contrast = sun - shade)
+```
 
 Again, the results are essentially the same:
 
-    plot(res1$log2FoldChange, res3$log2FoldChange)
+``` r
+plot(res1$log2FoldChange, res3$log2FoldChange)
+```
 
 In theory there’s no difference between these two ways of defining our
 design. The design with an intercept is more common, but for the
@@ -243,15 +275,19 @@ at models without intercept.
 One factor, three levels (slide 6)
 ==================================
 
-    # simulate data
-    dds <- makeExampleDESeqDataSet(n = 1000, m = 9, betaSD = 2)
-    dds$condition <- NULL
-    dds$colour <- factor(rep(c("pink", "yellow", "white"), each = 3))
-    dds$colour <- relevel(dds$colour, "white")
+``` r
+# simulate data
+dds <- makeExampleDESeqDataSet(n = 1000, m = 9, betaSD = 2)
+dds$condition <- NULL
+dds$colour <- factor(rep(c("pink", "yellow", "white"), each = 3))
+dds$colour <- relevel(dds$colour, "white")
+```
 
 First we can look at our sample information:
 
-    colData(dds)
+``` r
+colData(dds)
+```
 
     ## DataFrame with 9 rows and 1 column
     ##           colour
@@ -269,11 +305,13 @@ First we can look at our sample information:
 As in the previous example, we only have one factor of interest,
 `condition`, and so we define our design and run the DESeq as before:
 
-    design(dds) <- ~ 1 + colour
-    dds <- DESeq(dds)
+``` r
+design(dds) <- ~ 1 + colour
+dds <- DESeq(dds)
 
-    # check the coefficients estimated by DEseq
-    resultsNames(dds)
+# check the coefficients estimated by DEseq
+resultsNames(dds)
+```
 
     ## [1] "Intercept"              "colour_pink_vs_white"   "colour_yellow_vs_white"
 
@@ -288,23 +326,29 @@ We see that now we have 3 coefficients:
 We could obtain the difference between white and any of the two colours
 easily:
 
-    res1_pink_white <- results(dds, contrast = list("colour_pink_vs_white"))
-    res1_yellow_white <- results(dds, contrast = list("colour_yellow_vs_white"))
+``` r
+res1_pink_white <- results(dds, contrast = list("colour_pink_vs_white"))
+res1_yellow_white <- results(dds, contrast = list("colour_yellow_vs_white"))
+```
 
 For comparing pink vs yellow, however, we need to compare two
 coefficients with each other to check whether they are themselves
 different (check the slide to see the illustration). This is how the
 standard DESeq syntax would be:
 
-    res1_pink_yellow <- results(dds, contrast = list("colour_pink_vs_white", 
-                                                     "colour_yellow_vs_white"))
+``` r
+res1_pink_yellow <- results(dds, contrast = list("colour_pink_vs_white", 
+                                                 "colour_yellow_vs_white"))
+```
 
 However, following our three steps detailed in the first section, we can
 define our comparisons from the design matrix:
 
-    # define the model matrix
-    mod_mat <- model.matrix(design(dds), colData(dds))
-    mod_mat
+``` r
+# define the model matrix
+mod_mat <- model.matrix(design(dds), colData(dds))
+mod_mat
+```
 
     ##         (Intercept) colourpink colouryellow
     ## sample1           1          1            0
@@ -322,32 +366,38 @@ define our comparisons from the design matrix:
     ## attr(,"contrasts")$colour
     ## [1] "contr.treatment"
 
-    # calculate coefficient vectors for each group
-    pink <- colMeans(mod_mat[dds$colour == "pink", ])
-    white <- colMeans(mod_mat[dds$colour == "white", ])
-    yellow <- colMeans(mod_mat[dds$colour == "yellow", ])
+``` r
+# calculate coefficient vectors for each group
+pink <- colMeans(mod_mat[dds$colour == "pink", ])
+white <- colMeans(mod_mat[dds$colour == "white", ])
+yellow <- colMeans(mod_mat[dds$colour == "yellow", ])
+```
 
 And we can now define any contrasts we want:
 
-    # obtain results for each pairwise contrast
-    res2_pink_white <- results(dds, contrast = pink - white)
-    res2_pink_yellow <- results(dds, contrast = pink - yellow)
-    res2_yellow_white <- results(dds, contrast = yellow - white)
+``` r
+# obtain results for each pairwise contrast
+res2_pink_white <- results(dds, contrast = pink - white)
+res2_pink_yellow <- results(dds, contrast = pink - yellow)
+res2_yellow_white <- results(dds, contrast = yellow - white)
 
-    # plot the results from the two approaches to check that they are identical
-    plot(res1_pink_white$log2FoldChange, res2_pink_white$log2FoldChange)
-    plot(res1_pink_yellow$log2FoldChange, res2_pink_yellow$log2FoldChange)
-    plot(res1_yellow_white$log2FoldChange, res2_yellow_white$log2FoldChange)
+# plot the results from the two approaches to check that they are identical
+plot(res1_pink_white$log2FoldChange, res2_pink_white$log2FoldChange)
+plot(res1_pink_yellow$log2FoldChange, res2_pink_yellow$log2FoldChange)
+plot(res1_yellow_white$log2FoldChange, res2_yellow_white$log2FoldChange)
+```
 
 With this approach, we could even define a more unusual contrast, for
 example to find genes that differ between pigmented and non-pigmented
 samples:
 
-    # define vector of coefficients for pigmented samples
-    pigmented <- colMeans(mod_mat[dds$colour %in% c("pink", "yellow"),])
+``` r
+# define vector of coefficients for pigmented samples
+pigmented <- colMeans(mod_mat[dds$colour %in% c("pink", "yellow"),])
 
-    # Our contrast of interest is
-    pigmented - white
+# Our contrast of interest is
+pigmented - white
+```
 
     ##  (Intercept)   colourpink colouryellow 
     ##          0.0          0.5          0.5
@@ -357,16 +407,20 @@ each of `colourpink` and `colouryellow`. This is equivalent to saying
 that we want to consider the average of pink and yellow expression. In
 fact, we could have also defined our contrast vector like this:
 
-    # average of pink and yellow minus white
-    (pink + yellow)/2 - white
+``` r
+# average of pink and yellow minus white
+(pink + yellow)/2 - white
+```
 
     ##  (Intercept)   colourpink colouryellow 
     ##          0.0          0.5          0.5
 
 To obtain our results, we use the `results()` function as before:
 
-    # get the results between pigmented and white
-    res2_pigmented <- results(dds, contrast = pigmented - white)
+``` r
+# get the results between pigmented and white
+res2_pigmented <- results(dds, contrast = pigmented - white)
+```
 
 Extra: why not define a new group in our design matrix?
 -------------------------------------------------------
@@ -374,8 +428,10 @@ Extra: why not define a new group in our design matrix?
 For this last example (pigmented vs white), we may have considered
 creating a new variable in our column data:
 
-    dds$pigmented <- factor(dds$colour %in% c("pink", "yellow"))
-    colData(dds)
+``` r
+dds$pigmented <- factor(dds$colour %in% c("pink", "yellow"))
+colData(dds)
+```
 
     ## DataFrame with 9 rows and 3 columns
     ##           colour sizeFactor pigmented
@@ -392,13 +448,17 @@ creating a new variable in our column data:
 
 and then re-run DESeq with a new design:
 
-    design(dds) <- ~ 1 + pigmented
-    dds <- DESeq(dds)
-    resultsNames(dds)
+``` r
+design(dds) <- ~ 1 + pigmented
+dds <- DESeq(dds)
+resultsNames(dds)
+```
 
     ## [1] "Intercept"               "pigmented_TRUE_vs_FALSE"
 
-    res1_pigmented <- results(dds, contrast = list("pigmented_TRUE_vs_FALSE"))
+``` r
+res1_pigmented <- results(dds, contrast = list("pigmented_TRUE_vs_FALSE"))
+```
 
 However, in this model the gene dispersion is estimated together for
 pink and yellow samples as if they were replicates of each other, which
@@ -407,28 +467,34 @@ estimates the error within each of those groups.
 
 To check the difference one could compare the two approaches visually:
 
-    # compare the log-fold-changes between the two approaches
-    plot(res1_pigmented$log2FoldChange, res2_pigmented$log2FoldChange)
-    abline(0, 1, col = "brown", lwd = 2)
+``` r
+# compare the log-fold-changes between the two approaches
+plot(res1_pigmented$log2FoldChange, res2_pigmented$log2FoldChange)
+abline(0, 1, col = "brown", lwd = 2)
 
-    # compare the errors between the two approaches
-    plot(res1_pigmented$lfcSE, res2_pigmented$lfcSE)
-    abline(0, 1, col = "brown", lwd = 2)
+# compare the errors between the two approaches
+plot(res1_pigmented$lfcSE, res2_pigmented$lfcSE)
+abline(0, 1, col = "brown", lwd = 2)
+```
 
 Two factors with interaction (slide 7)
 ======================================
 
-    # simulate data
-    dds <- makeExampleDESeqDataSet(n = 1000, m = 12, betaSD = 2)
-    dds$colour <- factor(rep(c("pink", "white"), each = 6))
-    dds$colour <- relevel(dds$colour, "white")
-    dds$condition <- factor(rep(c("sun", "shade"), 6))
-    dds <- dds[, order(dds$colour, dds$condition)]
-    colnames(dds) <- paste0("sample", 1:ncol(dds))
+``` r
+# simulate data
+dds <- makeExampleDESeqDataSet(n = 1000, m = 12, betaSD = 2)
+dds$colour <- factor(rep(c("pink", "white"), each = 6))
+dds$colour <- relevel(dds$colour, "white")
+dds$condition <- factor(rep(c("sun", "shade"), 6))
+dds <- dds[, order(dds$colour, dds$condition)]
+colnames(dds) <- paste0("sample", 1:ncol(dds))
+```
 
 First let’s look at our sample information:
 
-    colData(dds)
+``` r
+colData(dds)
+```
 
     ## DataFrame with 12 rows and 2 columns
     ##          condition   colour
@@ -450,9 +516,11 @@ with an interaction (i.e. we assume that white and pink samples may
 respond differently to sun/shade). We define our design accordingly and
 fit the model:
 
-    design(dds) <- ~ 1 + colour + condition + colour:condition
-    dds <- DESeq(dds)
-    resultsNames(dds)
+``` r
+design(dds) <- ~ 1 + colour + condition + colour:condition
+dds <- DESeq(dds)
+resultsNames(dds)
+```
 
     ## [1] "Intercept"               "colour_pink_vs_white"   
     ## [3] "condition_sun_vs_shade"  "colourpink.conditionsun"
@@ -461,14 +529,16 @@ Because we have two factors and an interaction, the number of
 comparisons we can do is larger. Using our three-step approach from the
 model matrix, we do things exactly as we’ve been doing so far:
 
-    # get the model matrix
-    mod_mat <- model.matrix(design(dds), colData(dds))
+``` r
+# get the model matrix
+mod_mat <- model.matrix(design(dds), colData(dds))
 
-    # Define coefficient vectors for each condition
-    pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
-    pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
-    white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
-    white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+# Define coefficient vectors for each condition
+pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
+pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
+white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
+white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+```
 
 We are now ready to define any contrast of interest from these vectors
 (for completeness we show the equivalent syntax using the coefficient’s
@@ -476,37 +546,47 @@ names from DESeq).
 
 Pink vs White (in the shade):
 
-    res1 <- results(dds, contrast = pink_shade - white_shade)
-    # or equivalently
-    res2 <- results(dds, contrast = list("colour_pink_vs_white"))
+``` r
+res1 <- results(dds, contrast = pink_shade - white_shade)
+# or equivalently
+res2 <- results(dds, contrast = list("colour_pink_vs_white"))
+```
 
 Pink vs White (in the sun):
 
-    res1 <- results(dds, contrast = pink_sun - white_sun)
-    # or equivalently
-    res2 <- results(dds, contrast = list(c("colour_pink_vs_white",
-                                           "colourpink.conditionsun")))
+``` r
+res1 <- results(dds, contrast = pink_sun - white_sun)
+# or equivalently
+res2 <- results(dds, contrast = list(c("colour_pink_vs_white",
+                                       "colourpink.conditionsun")))
+```
 
 Sun vs Shade (for whites):
 
-    res1 <- results(dds, contrast = white_sun - white_shade)
-    # or equivalently
-    res2 <- results(dds, contrast = list(c("condition_sun_vs_shade")))
+``` r
+res1 <- results(dds, contrast = white_sun - white_shade)
+# or equivalently
+res2 <- results(dds, contrast = list(c("condition_sun_vs_shade")))
+```
 
 Sun vs Shade (for pinks):
 
-    res1 <- results(dds, contrast = pink_sun - pink_shade)
-    # or equivalently
-    res2 <- results(dds, contrast = list(c("condition_sun_vs_shade", 
-                                           "colourpink.conditionsun")))
+``` r
+res1 <- results(dds, contrast = pink_sun - pink_shade)
+# or equivalently
+res2 <- results(dds, contrast = list(c("condition_sun_vs_shade", 
+                                       "colourpink.conditionsun")))
+```
 
 Interaction between colour and condition (i.e. do pinks and whites
 respond differently to the sun?):
 
-    res1 <- results(dds, 
-                    contrast = (pink_sun - pink_shade) - (white_sun - white_shade))
-    # or equivalently
-    res2 <- results(dds, contrast = list("colourpink.conditionsun"))
+``` r
+res1 <- results(dds, 
+                contrast = (pink_sun - pink_shade) - (white_sun - white_shade))
+# or equivalently
+res2 <- results(dds, contrast = list("colourpink.conditionsun"))
+```
 
 In conclusion, although we can define these contrasts using DESeq
 coefficient names, it is somewhat more explicit (and perhaps intuitive?)
@@ -515,18 +595,22 @@ what it is we’re comparing using matrix-based contrasts.
 Three factors, with nesting (slide 8)
 =====================================
 
-    # simulate data
-    dds <- makeExampleDESeqDataSet(n = 1000, m = 24, betaSD = 2)
-    dds$colour <- factor(rep(c("white", "pink"), each = 12))
-    dds$colour <- relevel(dds$colour, "white")
-    dds$species <- factor(rep(LETTERS[1:4], each = 6))
-    dds$condition <- factor(rep(c("sun", "shade"), 12))
-    dds <- dds[, order(dds$colour, dds$species, dds$condition)]
-    colnames(dds) <- paste0("sample", 1:ncol(dds))
+``` r
+# simulate data
+dds <- makeExampleDESeqDataSet(n = 1000, m = 24, betaSD = 2)
+dds$colour <- factor(rep(c("white", "pink"), each = 12))
+dds$colour <- relevel(dds$colour, "white")
+dds$species <- factor(rep(LETTERS[1:4], each = 6))
+dds$condition <- factor(rep(c("sun", "shade"), 12))
+dds <- dds[, order(dds$colour, dds$species, dds$condition)]
+colnames(dds) <- paste0("sample", 1:ncol(dds))
+```
 
 First let’s look at our sample information:
 
-    colData(dds)
+``` r
+colData(dds)
+```
 
     ## DataFrame with 24 rows and 3 columns
     ##          condition   colour  species
@@ -550,9 +634,11 @@ is that colour is redundant with species). Because of this, we will
 define our design without including “colour”, although later we can
 compare groups of species of the same colour with each other.
 
-    design(dds) <- ~ 1 + species + condition + species:condition
-    dds <- DESeq(dds)
-    resultsNames(dds)
+``` r
+design(dds) <- ~ 1 + species + condition + species:condition
+dds <- DESeq(dds)
+resultsNames(dds)
+```
 
     ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"        
     ## [4] "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun" 
@@ -565,21 +651,25 @@ have done so far!
 
 Again, let’s define our groups from the model matrix:
 
-    # get the model matrix
-    mod_mat <- model.matrix(design(dds), colData(dds))
+``` r
+# get the model matrix
+mod_mat <- model.matrix(design(dds), colData(dds))
 
-    # define coefficient vectors for each group
-    pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
-    white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
-    pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
-    white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+# define coefficient vectors for each group
+pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
+white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
+pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
+white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+```
 
 It’s worth looking at some of these vectors, to see that they are
 composed of weighted coefficients from different species. For example,
 for “pink” species, we have equal contribution from “speciesC” and
 “speciesD”:
 
-    pink_shade
+``` r
+pink_shade
+```
 
     ##           (Intercept)              speciesB              speciesC 
     ##                   1.0                   0.0                   0.5 
@@ -591,7 +681,9 @@ for “pink” species, we have equal contribution from “speciesC” and
 And so, when we define our contrasts, each species will be correctly
 weighted:
 
-    pink_sun - pink_shade
+``` r
+pink_sun - pink_shade
+```
 
     ##           (Intercept)              speciesB              speciesC 
     ##                   0.0                   0.0                   0.0 
@@ -606,24 +698,28 @@ DESeq’s named coefficients).
 
 Pink vs White (in the shade):
 
-    res1_pink_white_shade <- results(dds, contrast = pink_shade - white_shade)
-    # or equivalently
-    res2_pink_white_shade <- results(dds, 
-                                     contrast = list(c("species_B_vs_A"),
-                                                     c("species_C_vs_A",
-                                                       "species_D_vs_A")))
+``` r
+res1_pink_white_shade <- results(dds, contrast = pink_shade - white_shade)
+# or equivalently
+res2_pink_white_shade <- results(dds, 
+                                 contrast = list(c("species_B_vs_A"),
+                                                 c("species_C_vs_A",
+                                                   "species_D_vs_A")))
+```
 
 Pink vs White (in the sun):
 
-    res1_pink_white_sun <- results(dds, contrast = pink_sun - white_sun)
-    # or equivalently
-    res2_pink_white_sun <- results(dds, 
-                               contrast = list(c("species_B_vs_A",
-                                                 "speciesB.conditionsun"),
-                                               c("species_C_vs_A", 
-                                                 "species_D_vs_A",
-                                                 "speciesC.conditionsun",
-                                                 "speciesD.conditionsun")))
+``` r
+res1_pink_white_sun <- results(dds, contrast = pink_sun - white_sun)
+# or equivalently
+res2_pink_white_sun <- results(dds, 
+                           contrast = list(c("species_B_vs_A",
+                                             "speciesB.conditionsun"),
+                                           c("species_C_vs_A", 
+                                             "species_D_vs_A",
+                                             "speciesC.conditionsun",
+                                             "speciesD.conditionsun")))
+```
 
 And so on, for other contrasts of interest…
 
@@ -633,9 +729,11 @@ Extra: imbalanced design
 Let’s take our previous example, but drop one of the samples from the
 data, so that we only have 2 replicates for it.
 
-    dds <- dds[, -13] # drop one of the species C samples
-    dds <- DESeq(dds)
-    resultsNames(dds)
+``` r
+dds <- dds[, -13] # drop one of the species C samples
+dds <- DESeq(dds)
+resultsNames(dds)
+```
 
     ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"        
     ## [4] "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun" 
@@ -643,8 +741,10 @@ data, so that we only have 2 replicates for it.
 
 Define our model matrix and coefficient vectors:
 
-    mod_mat <- model.matrix(design(dds), colData(dds))
-    mod_mat
+``` r
+mod_mat <- model.matrix(design(dds), colData(dds))
+mod_mat
+```
 
     ##          (Intercept) speciesB speciesC speciesD conditionsun
     ## sample1            1        0        0        0            0
@@ -703,15 +803,19 @@ Define our model matrix and coefficient vectors:
     ## attr(,"contrasts")$condition
     ## [1] "contr.treatment"
 
-    # define coefficient vectors for each group
-    pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
-    white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
-    pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
-    white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+``` r
+# define coefficient vectors for each group
+pink_shade <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "shade", ])
+white_shade <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "shade", ])
+pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
+white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
+```
 
 Now let’s check what happens to the pink\_shade group:
 
-    pink_shade
+``` r
+pink_shade
+```
 
     ##           (Intercept)              speciesB              speciesC 
     ##                   1.0                   0.0                   0.4 
@@ -732,8 +836,10 @@ any of this, the weights come from our `colMeans()` call automatically.
 And now, any contrasts that we make will take these weights into
 account:
 
-    # pink vs white (in the shade)
-    pink_shade - white_shade
+``` r
+# pink vs white (in the shade)
+pink_shade - white_shade
+```
 
     ##           (Intercept)              speciesB              speciesC 
     ##                   0.0                  -0.5                   0.4 
@@ -742,8 +848,10 @@ account:
     ## speciesC:conditionsun speciesD:conditionsun 
     ##                   0.0                   0.0
 
-    # interaction
-    (pink_sun - pink_shade) - (white_sun - white_shade)
+``` r
+# interaction
+(pink_sun - pink_shade) - (white_sun - white_shade)
+```
 
     ##           (Intercept)              speciesB              speciesC 
     ##                   0.0                   0.0                   0.1 
