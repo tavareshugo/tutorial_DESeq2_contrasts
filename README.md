@@ -9,3 +9,10 @@ This approach is general and so works for a range of experimental designs, even 
 
 If something doesn't look correct, please let me know ([open an issue](https://github.com/tavareshugo/tutorial_DESeq2_contrasts/issues/new)). 
 I would love to learn if I've gotten something wrong!
+
+----
+
+**Using these materials**
+
+Feel free to use and adapt these materials to your own needs. 
+If you do, please give attribution to: Hugo Tavares (University of Cambridge, Bioinformatics Training Facility)
