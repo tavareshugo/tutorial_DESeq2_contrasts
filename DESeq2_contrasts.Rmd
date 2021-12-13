@@ -451,26 +451,40 @@ Pink vs White (in the shade):
 res1_pink_white_shade <- results(dds, contrast = pink_shade - white_shade)
 # or equivalently
 res2_pink_white_shade <- results(dds, 
-                                 contrast = list(c("species_B_vs_A"),
-                                                 c("species_C_vs_A",
-                                                   "species_D_vs_A")))
+                                 contrast = list(c("species_C_vs_A",
+                                                   "species_D_vs_A"),
+                                                 c("species_B_vs_A")),
+                                 listValues = c(0.5, -0.5))
 ```
 
-Pink vs White (in the sun):
+Note that, when using the named coefficients, we had to add an extra option `listValues = c(0.5, -0.5)`, to weight each coefficient by half. 
+This can be thought of as taking the average of the two coefficients, similar to what we obtain with our numeric contrast, as we saw above when doing `pink_sun - pink_shade`. 
+
+Here is the comparison for Pink vs White (in the sun):
 
 ```{r}
 res1_pink_white_sun <- results(dds, contrast = pink_sun - white_sun)
 # or equivalently
 res2_pink_white_sun <- results(dds, 
-                           contrast = list(c("species_B_vs_A",
-                                             "speciesB.conditionsun"),
-                                           c("species_C_vs_A", 
+                           contrast = list(c("species_C_vs_A", 
                                              "species_D_vs_A",
                                              "speciesC.conditionsun",
-                                             "speciesD.conditionsun")))
+                                             "speciesD.conditionsun"),
+                                             c("species_B_vs_A",
+                                             "speciesB.conditionsun")),
+                           listValues = c(0.5, -0.5))
 ```
 
-And so on, for other contrasts of interest...
+Here is the results for the interaction, i.e. whether Pink and White respond differently to Sun-Shade:
+
+```{r}
+res1_interaction <- results(dds, contrast = (pink_sun - pink_shade) - (white_sun - white_shade))
+# or equivalently
+res2_interaction <- results(dds, 
+                            contrast = list(c("speciesC.conditionsun", "speciesD.conditionsun"),
+                                            c("speciesB.conditionsun")),
+                            listValues = c(0.5, -0.5))
+```
 
 
 ## Extra: imbalanced design

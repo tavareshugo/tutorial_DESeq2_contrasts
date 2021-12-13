@@ -18,8 +18,7 @@ There is a set of [accompanying
 slides](https://docs.google.com/presentation/d/1B9zW1_F-kBqQEu4xqxIJrudYP5DecytYMRR6bY4H6aM/edit?usp=sharing)
 that illustrate each of the sections below.
 
-One factor, two levels (slide 5)
-================================
+# One factor, two levels (slide 5)
 
 ``` r
 # simulate data
@@ -211,8 +210,7 @@ approach:
 plot(res1$log2FoldChange, res2$log2FoldChange)
 ```
 
-Extra: recoding the design (slide 12)
--------------------------------------
+## Extra: recoding the design (slide 12)
 
 Often, we can use different model matrices that essentially correspond
 to the same design. For example, we could recode our design above by
@@ -272,8 +270,7 @@ design. The design with an intercept is more common, but for the
 purposes of understanding what’s going on, it’s sometimes easier to look
 at models without intercept.
 
-One factor, three levels (slide 6)
-==================================
+# One factor, three levels (slide 6)
 
 ``` r
 # simulate data
@@ -318,10 +315,10 @@ resultsNames(dds)
 We see that now we have 3 coefficients:
 
 -   “Intercept” corresponds to white colour (our reference level)
--   “colour\_pink\_vs\_white” corresponds to the difference between the
+-   “colour_pink_vs_white” corresponds to the difference between the
     reference level and pink
--   “colour\_yellow\_vs\_white” corresponds to the difference between
-    the reference level and yellow
+-   “colour_yellow_vs_white” corresponds to the difference between the
+    reference level and yellow
 
 We could obtain the difference between white and any of the two colours
 easily:
@@ -422,8 +419,7 @@ To obtain our results, we use the `results()` function as before:
 res2_pigmented <- results(dds, contrast = pigmented - white)
 ```
 
-Extra: why not define a new group in our design matrix?
--------------------------------------------------------
+## Extra: why not define a new group in our design matrix?
 
 For this last example (pigmented vs white), we may have considered
 creating a new variable in our column data:
@@ -477,8 +473,7 @@ plot(res1_pigmented$lfcSE, res2_pigmented$lfcSE)
 abline(0, 1, col = "brown", lwd = 2)
 ```
 
-Two factors with interaction (slide 7)
-======================================
+# Two factors with interaction (slide 7)
 
 ``` r
 # simulate data
@@ -592,8 +587,7 @@ In conclusion, although we can define these contrasts using DESeq
 coefficient names, it is somewhat more explicit (and perhaps intuitive?)
 what it is we’re comparing using matrix-based contrasts.
 
-Three factors, with nesting (slide 8)
-=====================================
+# Three factors, with nesting (slide 8)
 
 ``` r
 # simulate data
@@ -702,29 +696,46 @@ Pink vs White (in the shade):
 res1_pink_white_shade <- results(dds, contrast = pink_shade - white_shade)
 # or equivalently
 res2_pink_white_shade <- results(dds, 
-                                 contrast = list(c("species_B_vs_A"),
-                                                 c("species_C_vs_A",
-                                                   "species_D_vs_A")))
+                                 contrast = list(c("species_C_vs_A",
+                                                   "species_D_vs_A"),
+                                                 c("species_B_vs_A")),
+                                 listValues = c(0.5, -0.5))
 ```
 
-Pink vs White (in the sun):
+Note that, when using the named coefficients, we had to add an extra
+option `listValues = c(0.5, -0.5)`, to weight each coefficient by half.
+This can be thought of as taking the average of the two coefficients,
+similar to what we obtain with our numeric contrast, as we saw above
+when doing `pink_sun - pink_shade`.
+
+Here is the comparison for Pink vs White (in the sun):
 
 ``` r
 res1_pink_white_sun <- results(dds, contrast = pink_sun - white_sun)
 # or equivalently
 res2_pink_white_sun <- results(dds, 
-                           contrast = list(c("species_B_vs_A",
-                                             "speciesB.conditionsun"),
-                                           c("species_C_vs_A", 
+                           contrast = list(c("species_C_vs_A", 
                                              "species_D_vs_A",
                                              "speciesC.conditionsun",
-                                             "speciesD.conditionsun")))
+                                             "speciesD.conditionsun"),
+                                             c("species_B_vs_A",
+                                             "speciesB.conditionsun")),
+                           listValues = c(0.5, -0.5))
 ```
 
-And so on, for other contrasts of interest…
+Here is the results for the interaction, i.e. whether Pink and White
+respond differently to Sun-Shade:
 
-Extra: imbalanced design
-------------------------
+``` r
+res1_interaction <- results(dds, contrast = (pink_sun - pink_shade) - (white_sun - white_shade))
+# or equivalently
+res2_interaction <- results(dds, 
+                            contrast = list(c("speciesC.conditionsun", "speciesD.conditionsun"),
+                                            c("speciesB.conditionsun")),
+                            listValues = c(0.5, -0.5))
+```
+
+## Extra: imbalanced design
 
 Let’s take our previous example, but drop one of the samples from the
 data, so that we only have 2 replicates for it.
@@ -811,7 +822,7 @@ pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
 white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
 ```
 
-Now let’s check what happens to the pink\_shade group:
+Now let’s check what happens to the pink_shade group:
 
 ``` r
 pink_shade
@@ -860,8 +871,7 @@ pink_shade - white_shade
     ## speciesC:conditionsun speciesD:conditionsun 
     ##                   0.5                   0.5
 
-Further reading
-===============
+# Further reading
 
 -   Forum discussion about nested design:
-    <a href="http://seqanswers.com/forums/showthread.php?t=47766" class="uri">http://seqanswers.com/forums/showthread.php?t=47766</a>
+    <http://seqanswers.com/forums/showthread.php?t=47766>
