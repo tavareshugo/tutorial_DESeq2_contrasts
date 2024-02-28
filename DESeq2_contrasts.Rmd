@@ -16,9 +16,25 @@ set.seed(10)
 library(DESeq2)
 ```
 
+`r emo::ji("warning")` **READ THIS BEFORE CONTINUING** 
+
+As I've come across more experimental designs, I have come to question the "universality" of the approach demonstrated in this tutorial. 
+In particular, for partially crossed imbalanced designs (see [issue #9](https://github.com/tavareshugo/tutorial_DESeq2_contrasts/issues/9)), where this approach would in fact create a wrong contrast vector. 
+When (if) I have time to revise this tutorial, I will come back to it. 
+Until them, please see these instructions as personal notes from someone who is still learning and may sometimes get things wrong.
+
+A general recommendation when working with more complex designs and custom contrasts is to always check the results output against the original data. 
+For example, [plot the original data points](https://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#plot-counts) for a given "significant" gene, to see if the expression in the individual samples makes sense with the `logFoldChange` reported from the model output.
+If there's a big discrepancy, then it's possible the contrast was not set correctly. 
+
+Despite the non-universality of this approach, I think the tutorial still gives a reasonable intuition of how contrast vectors work with DESeq2, at least for relatively simpler designs. 
+
+----
+
 In this tutorial we show how to set treatment contrasts in `<DESeq2>` using the design or model matrix. 
 This is a general and flexible way to define contrasts, and is often useful for more complex contrasts or when the design of the experiment is imbalanced (e.g. different number of replicates in each group). 
-Although we focus on `<DESeq2>`, the approach can also be used with the other popular package `<edgeR>`.
+Although we focus on `<DESeq2>`, the approach can also be used with the other popular package `<edgeR>`.  
+(**edit:** see the warning at the top of this page)
 
 Each section below covers a particular experimental design, from simpler to more complex ones. 
 The first chunk of code in each section is to simulate data, which has no particular meaning and is only done in order to have a DESeqDataSet object with the right kind of variables for each example. 
@@ -488,6 +504,8 @@ res2_interaction <- results(dds,
 
 
 ## Extra: imbalanced design
+
+(**edit:** see the warning at the top of this page)
 
 Let's take our previous example, but drop one of the samples from the data, so that we only have 2 replicates for it.
 

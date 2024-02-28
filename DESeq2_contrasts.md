@@ -1,9 +1,36 @@
+⚠️ **READ THIS BEFORE CONTINUING**
+
+As I’ve come across more experimental designs, I have come to question
+the “universality” of the approach demonstrated in this tutorial. In
+particular, for partially crossed imbalanced designs (see [issue
+\#9](https://github.com/tavareshugo/tutorial_DESeq2_contrasts/issues/9)),
+where this approach would in fact create a wrong contrast vector. When
+(if) I have time to revise this tutorial, I will come back to it. Until
+them, please see these instructions as personal notes from someone who
+is still learning and may sometimes get things wrong.
+
+A general recommendation when working with more complex designs and
+custom contrasts is to always check the results output against the
+original data. For example, [plot the original data
+points](https://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#plot-counts)
+for a given “significant” gene, to see if the expression in the
+individual samples makes sense with the `logFoldChange` reported from
+the model output. If there’s a big discrepancy, then it’s possible the
+contrast was not set correctly.
+
+Despite the non-universality of this approach, I think the tutorial
+still gives a reasonable intuition of how contrast vectors work with
+DESeq2, at least for relatively simpler designs.
+
+------------------------------------------------------------------------
+
 In this tutorial we show how to set treatment contrasts in `<DESeq2>`
 using the design or model matrix. This is a general and flexible way to
 define contrasts, and is often useful for more complex contrasts or when
 the design of the experiment is imbalanced (e.g. different number of
 replicates in each group). Although we focus on `<DESeq2>`, the approach
-can also be used with the other popular package `<edgeR>`.
+can also be used with the other popular package `<edgeR>`.  
+(**edit:** see the warning at the top of this page)
 
 Each section below covers a particular experimental design, from simpler
 to more complex ones. The first chunk of code in each section is to
@@ -18,7 +45,8 @@ There is a set of [accompanying
 slides](https://docs.google.com/presentation/d/1B9zW1_F-kBqQEu4xqxIJrudYP5DecytYMRR6bY4H6aM/edit?usp=sharing)
 that illustrate each of the sections below.
 
-# One factor, two levels (slide 5)
+One factor, two levels (slide 5)
+================================
 
 ``` r
 # simulate data
@@ -73,32 +101,19 @@ res1
     ## log2 fold change (MLE): condition_sun_vs_shade effect 
     ## Wald test p-value: condition_sun_vs_shade effect 
     ## DataFrame with 1000 rows and 6 columns
-    ##           baseMean log2FoldChange     lfcSE         stat      pvalue
-    ##          <numeric>      <numeric> <numeric>    <numeric>   <numeric>
-    ## gene1     40.90941    1.267525859  0.574144  2.207679752   0.0272666
-    ## gene2     12.21876   -0.269917301  1.111127 -0.242922069   0.8080658
-    ## gene3      1.91439   -3.538133611  2.564464 -1.379677442   0.1676860
-    ## gene4     10.24472    0.954811627  1.166408  0.818591708   0.4130194
-    ## gene5     13.16824    0.000656519  0.868780  0.000755679   0.9993971
-    ## ...            ...            ...       ...          ...         ...
-    ## gene996   40.43827     -1.0291276  0.554587    -1.855664 0.063501471
-    ## gene997   52.88360      0.0622133  0.561981     0.110704 0.911851377
-    ## gene998   73.06582      1.3271896  0.576695     2.301373 0.021370581
-    ## gene999    8.87701     -5.8385374  1.549471    -3.768084 0.000164506
-    ## gene1000  37.06533      1.2669314  0.602010     2.104501 0.035334764
-    ##                 padj
-    ##            <numeric>
-    ## gene1      0.0712378
-    ## gene2      0.8779871
-    ## gene3      0.2943125
-    ## gene4      0.5692485
-    ## gene5      0.9996728
-    ## ...              ...
-    ## gene996  0.138827354
-    ## gene997  0.948279388
-    ## gene998  0.059599481
-    ## gene999  0.000914882
-    ## gene1000 0.087737235
+    ##           baseMean log2FoldChange     lfcSE         stat      pvalue        padj
+    ##          <numeric>      <numeric> <numeric>    <numeric>   <numeric>   <numeric>
+    ## gene1     40.90941    1.267525859  0.574144  2.207679752   0.0272666   0.0712378
+    ## gene2     12.21876   -0.269917301  1.111127 -0.242922069   0.8080658   0.8779871
+    ## gene3      1.91439   -3.538133611  2.564464 -1.379677442   0.1676860   0.2943125
+    ## gene4     10.24472    0.954811627  1.166408  0.818591708   0.4130194   0.5692485
+    ## gene5     13.16824    0.000656519  0.868780  0.000755679   0.9993971   0.9996728
+    ## ...            ...            ...       ...          ...         ...         ...
+    ## gene996   40.43827     -1.0291276  0.554587    -1.855664 0.063501471 0.138827354
+    ## gene997   52.88360      0.0622133  0.561981     0.110704 0.911851377 0.948279388
+    ## gene998   73.06582      1.3271896  0.576695     2.301373 0.021370581 0.059599481
+    ## gene999    8.87701     -5.8385374  1.549471    -3.768084 0.000164506 0.000914882
+    ## gene1000  37.06533      1.2669314  0.602010     2.104501 0.035334764 0.087737235
 
 The above is a simple way to obtain the results of interest. But it is
 worth understanding how DESeq is getting to these results by looking at
@@ -210,7 +225,8 @@ approach:
 plot(res1$log2FoldChange, res2$log2FoldChange)
 ```
 
-## Extra: recoding the design (slide 12)
+Extra: recoding the design (slide 12)
+-------------------------------------
 
 Often, we can use different model matrices that essentially correspond
 to the same design. For example, we could recode our design above by
@@ -270,7 +286,8 @@ design. The design with an intercept is more common, but for the
 purposes of understanding what’s going on, it’s sometimes easier to look
 at models without intercept.
 
-# One factor, three levels (slide 6)
+One factor, three levels (slide 6)
+==================================
 
 ``` r
 # simulate data
@@ -315,10 +332,10 @@ resultsNames(dds)
 We see that now we have 3 coefficients:
 
 -   “Intercept” corresponds to white colour (our reference level)
--   “colour_pink_vs_white” corresponds to the difference between the
+-   “colour\_pink\_vs\_white” corresponds to the difference between the
     reference level and pink
--   “colour_yellow_vs_white” corresponds to the difference between the
-    reference level and yellow
+-   “colour\_yellow\_vs\_white” corresponds to the difference between
+    the reference level and yellow
 
 We could obtain the difference between white and any of the two colours
 easily:
@@ -419,7 +436,8 @@ To obtain our results, we use the `results()` function as before:
 res2_pigmented <- results(dds, contrast = pigmented - white)
 ```
 
-## Extra: why not define a new group in our design matrix?
+Extra: why not define a new group in our design matrix?
+-------------------------------------------------------
 
 For this last example (pigmented vs white), we may have considered
 creating a new variable in our column data:
@@ -473,7 +491,8 @@ plot(res1_pigmented$lfcSE, res2_pigmented$lfcSE)
 abline(0, 1, col = "brown", lwd = 2)
 ```
 
-# Two factors with interaction (slide 7)
+Two factors with interaction (slide 7)
+======================================
 
 ``` r
 # simulate data
@@ -517,8 +536,7 @@ dds <- DESeq(dds)
 resultsNames(dds)
 ```
 
-    ## [1] "Intercept"               "colour_pink_vs_white"   
-    ## [3] "condition_sun_vs_shade"  "colourpink.conditionsun"
+    ## [1] "Intercept"               "colour_pink_vs_white"    "condition_sun_vs_shade"  "colourpink.conditionsun"
 
 Because we have two factors and an interaction, the number of
 comparisons we can do is larger. Using our three-step approach from the
@@ -587,7 +605,8 @@ In conclusion, although we can define these contrasts using DESeq
 coefficient names, it is somewhat more explicit (and perhaps intuitive?)
 what it is we’re comparing using matrix-based contrasts.
 
-# Three factors, with nesting (slide 8)
+Three factors, with nesting (slide 8)
+=====================================
 
 ``` r
 # simulate data
@@ -634,9 +653,8 @@ dds <- DESeq(dds)
 resultsNames(dds)
 ```
 
-    ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"        
-    ## [4] "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun" 
-    ## [7] "speciesC.conditionsun"  "speciesD.conditionsun"
+    ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"         "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun"  "speciesC.conditionsun" 
+    ## [8] "speciesD.conditionsun"
 
 Now it’s harder to define contrasts between groups of species of the
 same colour using DESeq’s coefficient names (although still possible).
@@ -665,12 +683,8 @@ for “pink” species, we have equal contribution from “speciesC” and
 pink_shade
 ```
 
-    ##           (Intercept)              speciesB              speciesC 
-    ##                   1.0                   0.0                   0.5 
-    ##              speciesD          conditionsun speciesB:conditionsun 
-    ##                   0.5                   0.0                   0.0 
-    ## speciesC:conditionsun speciesD:conditionsun 
-    ##                   0.0                   0.0
+    ##           (Intercept)              speciesB              speciesC              speciesD          conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun 
+    ##                   1.0                   0.0                   0.5                   0.5                   0.0                   0.0                   0.0                   0.0
 
 And so, when we define our contrasts, each species will be correctly
 weighted:
@@ -679,12 +693,8 @@ weighted:
 pink_sun - pink_shade
 ```
 
-    ##           (Intercept)              speciesB              speciesC 
-    ##                   0.0                   0.0                   0.0 
-    ##              speciesD          conditionsun speciesB:conditionsun 
-    ##                   0.0                   1.0                   0.0 
-    ## speciesC:conditionsun speciesD:conditionsun 
-    ##                   0.5                   0.5
+    ##           (Intercept)              speciesB              speciesC              speciesD          conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun 
+    ##                   0.0                   0.0                   0.0                   0.0                   1.0                   0.0                   0.5                   0.5
 
 We can set our contrasts in exactly the same way as we did in the
 previous section (for completeness, we also give the contrasts using
@@ -735,7 +745,10 @@ res2_interaction <- results(dds,
                             listValues = c(0.5, -0.5))
 ```
 
-## Extra: imbalanced design
+Extra: imbalanced design
+------------------------
+
+(**edit:** see the warning at the top of this page)
 
 Let’s take our previous example, but drop one of the samples from the
 data, so that we only have 2 replicates for it.
@@ -746,9 +759,8 @@ dds <- DESeq(dds)
 resultsNames(dds)
 ```
 
-    ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"        
-    ## [4] "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun" 
-    ## [7] "speciesC.conditionsun"  "speciesD.conditionsun"
+    ## [1] "Intercept"              "species_B_vs_A"         "species_C_vs_A"         "species_D_vs_A"         "condition_sun_vs_shade" "speciesB.conditionsun"  "speciesC.conditionsun" 
+    ## [8] "speciesD.conditionsun"
 
 Define our model matrix and coefficient vectors:
 
@@ -757,54 +769,30 @@ mod_mat <- model.matrix(design(dds), colData(dds))
 mod_mat
 ```
 
-    ##          (Intercept) speciesB speciesC speciesD conditionsun
-    ## sample1            1        0        0        0            0
-    ## sample2            1        0        0        0            0
-    ## sample3            1        0        0        0            0
-    ## sample4            1        0        0        0            1
-    ## sample5            1        0        0        0            1
-    ## sample6            1        0        0        0            1
-    ## sample7            1        1        0        0            0
-    ## sample8            1        1        0        0            0
-    ## sample9            1        1        0        0            0
-    ## sample10           1        1        0        0            1
-    ## sample11           1        1        0        0            1
-    ## sample12           1        1        0        0            1
-    ## sample14           1        0        1        0            0
-    ## sample15           1        0        1        0            0
-    ## sample16           1        0        1        0            1
-    ## sample17           1        0        1        0            1
-    ## sample18           1        0        1        0            1
-    ## sample19           1        0        0        1            0
-    ## sample20           1        0        0        1            0
-    ## sample21           1        0        0        1            0
-    ## sample22           1        0        0        1            1
-    ## sample23           1        0        0        1            1
-    ## sample24           1        0        0        1            1
-    ##          speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun
-    ## sample1                      0                     0                     0
-    ## sample2                      0                     0                     0
-    ## sample3                      0                     0                     0
-    ## sample4                      0                     0                     0
-    ## sample5                      0                     0                     0
-    ## sample6                      0                     0                     0
-    ## sample7                      0                     0                     0
-    ## sample8                      0                     0                     0
-    ## sample9                      0                     0                     0
-    ## sample10                     1                     0                     0
-    ## sample11                     1                     0                     0
-    ## sample12                     1                     0                     0
-    ## sample14                     0                     0                     0
-    ## sample15                     0                     0                     0
-    ## sample16                     0                     1                     0
-    ## sample17                     0                     1                     0
-    ## sample18                     0                     1                     0
-    ## sample19                     0                     0                     0
-    ## sample20                     0                     0                     0
-    ## sample21                     0                     0                     0
-    ## sample22                     0                     0                     1
-    ## sample23                     0                     0                     1
-    ## sample24                     0                     0                     1
+    ##          (Intercept) speciesB speciesC speciesD conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun
+    ## sample1            1        0        0        0            0                     0                     0                     0
+    ## sample2            1        0        0        0            0                     0                     0                     0
+    ## sample3            1        0        0        0            0                     0                     0                     0
+    ## sample4            1        0        0        0            1                     0                     0                     0
+    ## sample5            1        0        0        0            1                     0                     0                     0
+    ## sample6            1        0        0        0            1                     0                     0                     0
+    ## sample7            1        1        0        0            0                     0                     0                     0
+    ## sample8            1        1        0        0            0                     0                     0                     0
+    ## sample9            1        1        0        0            0                     0                     0                     0
+    ## sample10           1        1        0        0            1                     1                     0                     0
+    ## sample11           1        1        0        0            1                     1                     0                     0
+    ## sample12           1        1        0        0            1                     1                     0                     0
+    ## sample14           1        0        1        0            0                     0                     0                     0
+    ## sample15           1        0        1        0            0                     0                     0                     0
+    ## sample16           1        0        1        0            1                     0                     1                     0
+    ## sample17           1        0        1        0            1                     0                     1                     0
+    ## sample18           1        0        1        0            1                     0                     1                     0
+    ## sample19           1        0        0        1            0                     0                     0                     0
+    ## sample20           1        0        0        1            0                     0                     0                     0
+    ## sample21           1        0        0        1            0                     0                     0                     0
+    ## sample22           1        0        0        1            1                     0                     0                     1
+    ## sample23           1        0        0        1            1                     0                     0                     1
+    ## sample24           1        0        0        1            1                     0                     0                     1
     ## attr(,"assign")
     ## [1] 0 1 1 1 2 3 3 3
     ## attr(,"contrasts")
@@ -822,18 +810,14 @@ pink_sun <- colMeans(mod_mat[dds$colour == "pink" & dds$condition == "sun", ])
 white_sun <- colMeans(mod_mat[dds$colour == "white" & dds$condition == "sun", ])
 ```
 
-Now let’s check what happens to the pink_shade group:
+Now let’s check what happens to the pink\_shade group:
 
 ``` r
 pink_shade
 ```
 
-    ##           (Intercept)              speciesB              speciesC 
-    ##                   1.0                   0.0                   0.4 
-    ##              speciesD          conditionsun speciesB:conditionsun 
-    ##                   0.6                   0.0                   0.0 
-    ## speciesC:conditionsun speciesD:conditionsun 
-    ##                   0.0                   0.0
+    ##           (Intercept)              speciesB              speciesC              speciesD          conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun 
+    ##                   1.0                   0.0                   0.4                   0.6                   0.0                   0.0                   0.0                   0.0
 
 Notice that whereas before “speciesC” and “speciesD” had each a weight
 of 0.5, now they have different weights. That’s because for speciesC
@@ -852,26 +836,19 @@ account:
 pink_shade - white_shade
 ```
 
-    ##           (Intercept)              speciesB              speciesC 
-    ##                   0.0                  -0.5                   0.4 
-    ##              speciesD          conditionsun speciesB:conditionsun 
-    ##                   0.6                   0.0                   0.0 
-    ## speciesC:conditionsun speciesD:conditionsun 
-    ##                   0.0                   0.0
+    ##           (Intercept)              speciesB              speciesC              speciesD          conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun 
+    ##                   0.0                  -0.5                   0.4                   0.6                   0.0                   0.0                   0.0                   0.0
 
 ``` r
 # interaction
 (pink_sun - pink_shade) - (white_sun - white_shade)
 ```
 
-    ##           (Intercept)              speciesB              speciesC 
-    ##                   0.0                   0.0                   0.1 
-    ##              speciesD          conditionsun speciesB:conditionsun 
-    ##                  -0.1                   0.0                  -0.5 
-    ## speciesC:conditionsun speciesD:conditionsun 
-    ##                   0.5                   0.5
+    ##           (Intercept)              speciesB              speciesC              speciesD          conditionsun speciesB:conditionsun speciesC:conditionsun speciesD:conditionsun 
+    ##                   0.0                   0.0                   0.1                  -0.1                   0.0                  -0.5                   0.5                   0.5
 
-# Further reading
+Further reading
+===============
 
 -   Forum discussion about nested design:
-    <http://seqanswers.com/forums/showthread.php?t=47766>
+    <a href="http://seqanswers.com/forums/showthread.php?t=47766" class="uri">http://seqanswers.com/forums/showthread.php?t=47766</a>
