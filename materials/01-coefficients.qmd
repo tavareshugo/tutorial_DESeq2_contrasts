@@ -1,0 +1,24 @@
+---
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+```
+
+
+```{r load libraries}
+library(tidyverse)
+```
+
+We start with a very simple design: a between-groups design with two levels for a treatment.
+
+```{mermaid}
+%% diagram illustrating a between-groups design with two levels for a treatment
+flowchart TD
+    A[Control]
+    B[Drug A]
+```
